@@ -405,7 +405,9 @@ struct TaskEditorView: View {
                         Button {
                             Haptics.selection()
                             withAnimation(PulseMotion.snappy) {
-                                subtasks[index].isDone.toggle()
+                                if let position = subtasks.firstIndex(where: { $0.id == subtask.id }) {
+                                    subtasks[position].isDone.toggle()
+                                }
                             }
                         } label: {
                             Image(systemName: subtask.isDone ? "checkmark.circle.fill" : "circle")
