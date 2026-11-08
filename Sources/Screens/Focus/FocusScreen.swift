@@ -72,7 +72,7 @@ struct FocusScreen: View {
             }
             .padding(.horizontal, PulseMetrics.screenPadding)
             .padding(.top, 10)
-            .padding(.bottom, 120)
+            .padding(.bottom, 28)
         }
     }
 

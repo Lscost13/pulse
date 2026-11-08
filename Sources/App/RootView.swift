@@ -1,4 +1,4 @@
-﻿//
+//
 //  RootView.swift
 //  PULSE
 //
@@ -85,30 +85,87 @@ struct RootView: View {
 
     // MARK: - iPhone
 
+    @ViewBuilder
     private func phoneShell(router: Router) -> some View {
-        ZStack(alignment: .bottomTrailing) {
-            Group {
-                switch router.tab {
-                case .today: TodayScreen()
-                case .calendar: CalendarScreen()
-                case .tasks: TasksScreen()
-                case .focus: FocusScreen()
-                case .insights: InsightsScreen()
-                case .streak: StreakScreen(isModal: false)
+        if #available(iOS 26.0, *) {
+            tabView(router: router)
+                .tabBarMinimizeBehavior(.onScrollDown)
+                .tabViewBottomAccessory {
+                    quickAddAccessory
                 }
+        } else {
+            ZStack(alignment: .bottomTrailing) {
+                tabView(router: router)
+                addButton
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 96)
             }
-            .id(router.tab)
-            .transition(.opacity)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                PulseTabBar(selection: tabBinding(router: router), accent: store.settings.accent.color)
-            }
-
-            addButton
-                .padding(.trailing, 20)
-                .padding(.bottom, 92)
         }
-        .animation(PulseMotion.smooth, value: router.tab)
+    }
+
+    /// Нативная панель: на iOS 26 она сама получает Liquid Glass,
+    /// свёртывание при скролле и нижний аксессуар.
+    private func tabView(router: Router) -> some View {
+        TabView(selection: tabBinding(router: router)) {
+            TodayScreen()
+                .tag(PulseTab.today)
+                .tabItem { Label(PulseTab.today.title, systemImage: PulseTab.today.filledSymbol) }
+
+            CalendarScreen()
+                .tag(PulseTab.calendar)
+                .tabItem { Label(PulseTab.calendar.title, systemImage: PulseTab.calendar.filledSymbol) }
+
+            TasksScreen()
+                .tag(PulseTab.tasks)
+                .tabItem { Label(PulseTab.tasks.title, systemImage: PulseTab.tasks.filledSymbol) }
+
+            FocusScreen()
+                .tag(PulseTab.focus)
+                .tabItem { Label(PulseTab.focus.title, systemImage: PulseTab.focus.filledSymbol) }
+
+            InsightsScreen()
+                .tag(PulseTab.insights)
+                .tabItem { Label(PulseTab.insights.title, systemImage: PulseTab.insights.filledSymbol) }
+        }
+        .tint(store.settings.accent.color)
+    }
+
+    /// Нижний аксессуар iOS 26: быстрое добавление и состояние дня.
+    private var quickAddAccessory: some View {
+        Button {
+            Haptics.tap()
+            router.showQuickAdd = true
+        } label: {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(PulseGradient.accent(store.settings.accent.color))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.white)
+                }
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Быстрая задача")
+                        .font(PulseFont.caption)
+                        .foregroundStyle(PulsePalette.ink)
+                    Text("\(store.todayOpenTasks.count) открыто · \(PulseDate.durationShort(minutes: store.freeMinutesToday)) свободно")
+                        .font(PulseFont.micro)
+                        .foregroundStyle(PulsePalette.inkTertiary)
+                }
+
+                Spacer(minLength: 6)
+
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(PulsePalette.inkTertiary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var addButton: some View {

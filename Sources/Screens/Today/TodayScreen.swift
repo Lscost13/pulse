@@ -45,7 +45,7 @@ struct TodayScreen: View {
         }
         .padding(.horizontal, PulseMetrics.screenPadding)
         .padding(.top, 6)
-        .padding(.bottom, 110)
+        .padding(.bottom, 28)
     }
 
     private var wideLayout: some View {

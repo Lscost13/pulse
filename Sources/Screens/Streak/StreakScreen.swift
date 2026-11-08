@@ -1,4 +1,4 @@
-//
+﻿//
 //  StreakScreen.swift
 //  PULSE
 //
@@ -39,7 +39,7 @@ struct StreakScreen: View {
                 }
                 .padding(.horizontal, PulseMetrics.screenPadding)
                 .padding(.top, isModal ? 18 : 10)
-                .padding(.bottom, 120)
+                .padding(.bottom, 28)
             }
         }
     }
