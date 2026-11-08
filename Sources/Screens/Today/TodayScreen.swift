@@ -1,4 +1,4 @@
-//
+﻿//
 //  TodayScreen.swift
 //  PULSE
 //
@@ -34,7 +34,8 @@ struct TodayScreen: View {
         VStack(alignment: .leading, spacing: PulseMetrics.sectionSpacing) {
             header.pulseAppear(0)
             heroCard.pulseAppear(1)
-            agendaCard.pulseAppear(2)
+            reviewCard.pulseAppear(2)
+            agendaCard.pulseAppear(3)
             tasksCard.pulseAppear(3)
             freeTimeCard.pulseAppear(4)
             streakCard.pulseAppear(5)
@@ -51,6 +52,7 @@ struct TodayScreen: View {
             HStack(alignment: .top, spacing: 20) {
                 VStack(spacing: PulseMetrics.sectionSpacing) {
                     heroCard.pulseAppear(1)
+                    reviewCard.pulseAppear(2)
                     tasksCard.pulseAppear(3)
                 }
                 .frame(maxWidth: .infinity)
@@ -215,6 +217,61 @@ struct TodayScreen: View {
         case .busy: return PulsePalette.amber
         case .overloaded: return PulsePalette.danger
         }
+    }
+
+    // MARK: - Итоги дня
+
+    private var reviewCard: some View {
+        let today = store.today
+        let reflection = store.reflection(for: today)
+        let hasText = !(reflection?.text.isEmpty ?? true)
+        let scoreColor: Color = {
+            guard let value = reflection?.score else { return accent }
+            switch value {
+            case 0..<35: return PulsePalette.danger
+            case 35..<60: return PulsePalette.amber
+            case 60..<80: return PulsePalette.sky
+            default: return PulsePalette.mint
+            }
+        }()
+
+        return Button {
+            Haptics.tap()
+            router.openReview(day: today)
+        } label: {
+            PulseCard(padding: 14, tint: reflection == nil ? accent : scoreColor) {
+                HStack(spacing: 14) {
+                    ScoreDial(
+                        score: reflection?.score ?? 0,
+                        size: 62,
+                        lineWidth: 7,
+                        accent: scoreColor,
+                        showsNumber: true,
+                        showsWord: false
+                    )
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(reflection == nil ? "Как прошёл день?" : "Итоги дня")
+                            .font(PulseFont.subheadline)
+                            .foregroundStyle(PulsePalette.ink)
+                        Text(hasText ? (reflection?.text ?? "") : (reflection == nil
+                             ? "Оценка 0–100 и мысль дня"
+                             : "Добавь мысль дня"))
+                            .font(PulseFont.caption)
+                            .foregroundStyle(PulsePalette.inkTertiary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(PulsePalette.inkTertiary)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Ближайшее событие

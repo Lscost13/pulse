@@ -393,6 +393,33 @@ struct Achievement: Identifiable, Codable, Hashable {
     var isUnlocked: Bool { unlockedAt != nil }
 }
 
+// MARK: - Впечатление о дне
+
+struct DailyReflection: Identifiable, Codable, Hashable {
+    var id: UUID = UUID()
+    var dayKey: String = ""
+    var score: Int = 0
+    var text: String = ""
+    var updatedAt: Date = Date()
+
+    var day: Date {
+        Date.from(dayKey: dayKey) ?? Date()
+    }
+
+    var isFilled: Bool {
+        score > 0 || !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var scoreColorKey: String {
+        switch score {
+        case 0..<35: return "danger"
+        case 35..<60: return "amber"
+        case 60..<80: return "sky"
+        default: return "mint"
+        }
+    }
+}
+
 // MARK: - Серия
 
 struct StreakStats {

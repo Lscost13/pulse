@@ -1,4 +1,4 @@
-//
+﻿//
 //  SampleData.swift
 //  PULSE
 //
@@ -300,14 +300,42 @@ enum SampleData {
         settings.weeklyGoalTasks = 25
         settings.restWeekdays = [1]
 
+        // Впечатления о прошлых днях — чтобы графики оценок были живыми
+        var reflections: [DailyReflection] = []
+        let reflectionSeeds: [(Int, Int, String)] = [
+            (-1, 84, "День получился плотным, но ровным. Главное — закрыл макет."),
+            (-2, 72, "Много переключений между задачами, вечером уже не было сил."),
+            (-3, 91, "Лучший день недели: две глубокие сессии без телефона."),
+            (-4, 65, "Скомкано. Стоило начать с самого сложного, а не с почты."),
+            (-5, 78, "Спокойно и по делу. Прогулка вернула голову на место."),
+            (-6, 88, "Успел всё, что планировал, и даже немного больше."),
+            (-7, 54, "Слабо. Проспал, весь день догонял."),
+            (-8, 80, "Хороший ритм: фокус с утра, встречи после обеда."),
+            (-9, 76, "Средний день, но привычки не пропустил."),
+            (-10, 92, "Ощущение контроля. Редкое и приятное."),
+            (-11, 68, "Много шума, мало глубины."),
+            (-12, 74, "Стабильно: задачи, чтение, прогулка.")
+        ]
+        for (offset, score, text) in reflectionSeeds {
+            reflections.append(
+                DailyReflection(
+                    dayKey: day(offset).dayKey,
+                    score: score,
+                    text: text,
+                    updatedAt: at(offset, 22, 30)
+                )
+            )
+        }
+
         return AppSnapshot(
-            schemaVersion: 1,
+            schemaVersion: 2,
             tasks: tasks,
             events: events,
             habits: habits,
             sessions: sessions,
             categories: categories,
             achievements: achievementCatalog(),
+            reflections: reflections,
             settings: settings
         )
     }

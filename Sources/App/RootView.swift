@@ -1,4 +1,4 @@
-//
+﻿//
 //  RootView.swift
 //  PULSE
 //
@@ -60,6 +60,9 @@ struct RootView: View {
             SettingsView()
         case .streak:
             StreakScreen(isModal: true)
+                .presentationDragIndicator(.visible)
+        case .review(let day):
+            DayReviewView(day: day)
                 .presentationDragIndicator(.visible)
         case .task(let request):
             TaskEditorView(request: request)
@@ -214,10 +217,21 @@ struct PulseTabBar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
+        .pulseGlass(in: Capsule(), tint: accent.opacity(scheme == .dark ? 0.16 : 0.10))
         .overlay {
-            Capsule().strokeBorder(PulsePalette.stroke.opacity(0.7), lineWidth: 1)
+            Capsule().strokeBorder(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(scheme == .dark ? 0.34 : 0.55),
+                        Color.white.opacity(0.04),
+                        Color.white.opacity(scheme == .dark ? 0.16 : 0.3)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 1
+            )
         }
-        .pulseGlass(in: Capsule(), tint: accent.opacity(scheme == .dark ? 0.14 : 0.08))
         .pulseShadow(PulseShadow.floating(scheme))
         .padding(.horizontal, 16)
         .padding(.bottom, 4)

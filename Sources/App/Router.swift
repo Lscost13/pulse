@@ -1,4 +1,4 @@
-//
+﻿//
 //  Router.swift
 //  PULSE
 //
@@ -85,6 +85,7 @@ enum SheetRoute: Identifiable, Hashable {
     case quickAdd
     case settings
     case streak
+    case review(Date)
     case task(TaskEditorRequest)
     case event(EventEditorRequest)
     case habit(HabitEditorRequest)
@@ -94,6 +95,7 @@ enum SheetRoute: Identifiable, Hashable {
         case .quickAdd: return "quickAdd"
         case .settings: return "settings"
         case .streak: return "streak"
+        case .review(let day): return "review-\(day.dayKey)"
         case .task(let request): return "task-\(request.id.uuidString)"
         case .event(let request): return "event-\(request.id.uuidString)"
         case .habit(let request): return "habit-\(request.id.uuidString)"
@@ -199,6 +201,10 @@ final class Router {
 
     func openEvent(_ event: CalendarEvent) {
         eventEditor = EventEditorRequest(event: event, day: event.start)
+    }
+
+    func openReview(day: Date) {
+        sheet = .review(day.startOfDay())
     }
 
     func openNewHabit() {

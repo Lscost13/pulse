@@ -20,6 +20,7 @@ final class AppStore {
     var sessions: [FocusSession] = []
     var categories: [TaskCategory] = []
     var achievements: [Achievement] = []
+    var reflections: [DailyReflection] = []
     var settings: PulseSettings = PulseSettings()
 
     // MARK: - Инициализация
@@ -63,18 +64,20 @@ final class AppStore {
         sessions = snapshot.sessions
         categories = snapshot.categories
         achievements = snapshot.achievements
+        reflections = snapshot.reflections
         settings = snapshot.settings
     }
 
     func currentSnapshot() -> AppSnapshot {
         AppSnapshot(
-            schemaVersion: 1,
+            schemaVersion: 2,
             tasks: tasks,
             events: events,
             habits: habits,
             sessions: sessions,
             categories: categories,
             achievements: achievements,
+            reflections: reflections,
             settings: settings
         )
     }
@@ -687,6 +690,58 @@ final class AppStore {
         achievements.filter { $0.isUnlocked }
     }
 
+    // MARK: - Впечатления о дне
+
+    func reflection(for day: Date) -> DailyReflection? {
+        let key = day.dayKey
+        return reflections.first { $0.dayKey == key }
+    }
+
+    @discardableResult
+    func saveReflection(day: Date, score: Int, text: String) -> DailyReflection {
+        let key = day.dayKey
+        let clamped = min(100, max(0, score))
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let index = reflections.firstIndex(where: { $0.dayKey == key }) {
+            reflections[index].score = clamped
+            reflections[index].text = trimmed
+            reflections[index].updatedAt = Date()
+        } else {
+            reflections.append(
+                DailyReflection(dayKey: key, score: clamped, text: trimmed, updatedAt: Date())
+            )
+        }
+        persist()
+        return reflection(for: day) ?? DailyReflection(dayKey: key, score: clamped, text: trimmed)
+    }
+
+    var filledReflections: [DailyReflection] {
+        reflections
+            .filter { $0.score > 0 || !$0.text.isEmpty }
+            .sorted { $0.dayKey > $1.dayKey }
+    }
+
+    /// Пары «день — оценка» за последние N дней (nil, если дня нет).
+    func scoreHistory(days: Int) -> [(day: Date, score: Int?)] {
+        let calendar = self.calendar
+        let today = calendar.startOfDay(for: Date())
+        let safeDays = max(1, min(days, 365))
+        var result: [(day: Date, score: Int?)] = []
+        result.reserveCapacity(safeDays)
+        for offset in stride(from: safeDays - 1, through: 0, by: -1) {
+            let day = today.adding(days: -offset, calendar: calendar)
+            result.append((day: day, score: reflection(for: day)?.score))
+        }
+        return result
+    }
+
+    func averageScore(days: Int) -> Double? {
+        let values = scoreHistory(days: days).compactMap { $0.score }.filter { $0 > 0 }
+        guard !values.isEmpty else { return nil }
+        return Double(values.reduce(0, +)) / Double(values.count)
+    }
+
     // MARK: - Статистика
 
     func stats(days: Int) -> StatsSnapshot {
@@ -711,13 +766,14 @@ final class AppStore {
         NotificationManager.cancelAll()
         Persistence.wipe()
         let empty = AppSnapshot(
-            schemaVersion: 1,
+            schemaVersion: 2,
             tasks: [],
             events: [],
             habits: [],
             sessions: [],
             categories: SampleData.defaultCategories(),
             achievements: SampleData.achievementCatalog(),
+            reflections: [],
             settings: settings
         )
         apply(empty)

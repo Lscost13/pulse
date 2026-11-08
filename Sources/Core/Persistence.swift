@@ -5,18 +5,69 @@
 //  Простое и надёжное локальное хранилище: один JSON-снапшот в
 //  Application Support. Никаких сетевых зависимостей.
 //
+//  Декодер написан вручную: новое поле не должно ломать уже
+//  сохранённые данные — отсутствующие ключи берут значения по умолчанию.
+//
 
 import Foundation
 
 struct AppSnapshot: Codable {
-    var schemaVersion: Int = 1
-    var tasks: [TaskItem] = []
-    var events: [CalendarEvent] = []
-    var habits: [Habit] = []
-    var sessions: [FocusSession] = []
-    var categories: [TaskCategory] = []
-    var achievements: [Achievement] = []
-    var settings: PulseSettings = PulseSettings()
+    var schemaVersion: Int
+    var tasks: [TaskItem]
+    var events: [CalendarEvent]
+    var habits: [Habit]
+    var sessions: [FocusSession]
+    var categories: [TaskCategory]
+    var achievements: [Achievement]
+    var reflections: [DailyReflection]
+    var settings: PulseSettings
+
+    init(
+        schemaVersion: Int = 2,
+        tasks: [TaskItem] = [],
+        events: [CalendarEvent] = [],
+        habits: [Habit] = [],
+        sessions: [FocusSession] = [],
+        categories: [TaskCategory] = [],
+        achievements: [Achievement] = [],
+        reflections: [DailyReflection] = [],
+        settings: PulseSettings = PulseSettings()
+    ) {
+        self.schemaVersion = schemaVersion
+        self.tasks = tasks
+        self.events = events
+        self.habits = habits
+        self.sessions = sessions
+        self.categories = categories
+        self.achievements = achievements
+        self.reflections = reflections
+        self.settings = settings
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case schemaVersion
+        case tasks
+        case events
+        case habits
+        case sessions
+        case categories
+        case achievements
+        case reflections
+        case settings
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = (try? container.decode(Int.self, forKey: .schemaVersion)) ?? 1
+        tasks = (try? container.decode([TaskItem].self, forKey: .tasks)) ?? []
+        events = (try? container.decode([CalendarEvent].self, forKey: .events)) ?? []
+        habits = (try? container.decode([Habit].self, forKey: .habits)) ?? []
+        sessions = (try? container.decode([FocusSession].self, forKey: .sessions)) ?? []
+        categories = (try? container.decode([TaskCategory].self, forKey: .categories)) ?? []
+        achievements = (try? container.decode([Achievement].self, forKey: .achievements)) ?? []
+        reflections = (try? container.decode([DailyReflection].self, forKey: .reflections)) ?? []
+        settings = (try? container.decode(PulseSettings.self, forKey: .settings)) ?? PulseSettings()
+    }
 }
 
 enum Persistence {
@@ -43,8 +94,7 @@ enum Persistence {
             return snapshot
         }
 
-        // Файл есть, но прочитать его не удалось (например, после смены схемы).
-        // Не затираем данные молча — отодвигаем файл в сторону.
+        // Прочитать не удалось — не затираем файл молча, отодвигаем в сторону.
         let stamp = Int(Date().timeIntervalSince1970)
         let backup = directory.appendingPathComponent("store-recovery-\(stamp).json")
         try? fileManager.moveItem(at: fileURL, to: backup)

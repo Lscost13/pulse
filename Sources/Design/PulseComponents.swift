@@ -1,4 +1,4 @@
-//
+﻿//
 //  PulseComponents.swift
 //  PULSE
 //
@@ -47,9 +47,9 @@ extension View {
     func pulseGlass<S: Shape>(in shape: S, tint: Color? = nil) -> some View {
         if #available(iOS 26.0, *) {
             if let tint = tint {
-                self.glassEffect(.regular.tint(tint), in: shape)
+                self.glassEffect(.regular.tint(tint).interactive(), in: shape)
             } else {
-                self.glassEffect(.regular, in: shape)
+                self.glassEffect(.regular.interactive(), in: shape)
             }
         } else {
             self

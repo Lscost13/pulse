@@ -1,4 +1,4 @@
-//
+﻿//
 //  InsightsScreen.swift
 //  PULSE
 //
@@ -6,10 +6,12 @@
 //  план против факта, тепловая карта и личные рекорды.
 //
 
+import Foundation
 import SwiftUI
 
 struct InsightsScreen: View {
     @Environment(AppStore.self) private var store
+    @Environment(Router.self) private var router
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var range: StatsRange = .week
@@ -35,6 +37,7 @@ struct InsightsScreen: View {
                             .frame(maxWidth: .infinity)
                             VStack(spacing: 18) {
                                 planVsFactCard
+                                scoresCard
                                 weekdayCard
                                 recordsCard
                             }
@@ -44,6 +47,7 @@ struct InsightsScreen: View {
                         dynamicCard
                         categoriesCard
                         planVsFactCard
+                        scoresCard
                         weekdayCard
                         heatmapCard
                         recordsCard
@@ -383,6 +387,60 @@ struct InsightsScreen: View {
                             .font(PulseFont.micro)
                             .foregroundStyle(PulsePalette.inkTertiary)
                         Spacer()
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Оценки дней
+
+    private var scoresCard: some View {
+        let history = store.scoreHistory(days: 14)
+        let values = history.map { $0.score }
+        let present = values.compactMap { $0 }
+        let average = store.averageScore(days: 14)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(
+                title: "Оценки дней",
+                subtitle: present.isEmpty ? nil : "\(present.count) из 14 дней",
+                actionTitle: "Оценить день",
+                action: { router.openReview(day: store.today) }
+            )
+
+            PulseCard(padding: 16) {
+                if present.isEmpty {
+                    EmptyState(
+                        symbol: "face.smiling",
+                        title: "Пока нет оценок",
+                        subtitle: "Закрывай день оценкой от 0 до 100 — здесь появится динамика.",
+                        actionTitle: "Оценить сегодня",
+                        action: { router.openReview(day: store.today) }
+                    )
+                } else {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ScoreSparkline(values: values, accent: accent)
+                            .frame(height: 88)
+
+                        HStack(spacing: 8) {
+                            StatTile(
+                                value: average.map { String(format: "%.0f", $0) } ?? "—",
+                                title: "средняя",
+                                symbol: "chart.line.uptrend.xyaxis",
+                                tint: accent
+                            )
+                            StatTile(
+                                value: "\(present.max() ?? 0)",
+                                title: "лучший",
+                                tint: PulsePalette.mint
+                            )
+                            StatTile(
+                                value: "\(present.min() ?? 0)",
+                                title: "слабый",
+                                tint: PulsePalette.amber
+                            )
+                        }
                     }
                 }
             }
