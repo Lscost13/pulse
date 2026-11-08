@@ -25,22 +25,35 @@ final class AppStore {
     // MARK: - Инициализация
 
     init() {
+        let rescueKey = "pulse.seedRescue.v1"
         let loaded = Persistence.load()
-        if let snapshot = loaded,
-           snapshot.settings.hasSeededDemo || !snapshot.tasks.isEmpty || !snapshot.habits.isEmpty {
+        let hasContent = loaded.map {
+            !$0.tasks.isEmpty || !$0.habits.isEmpty || !$0.events.isEmpty
+        } ?? false
+
+        if let snapshot = loaded, hasContent {
             apply(snapshot)
-        } else {
-            var demo = SampleData.make()
-            if let snapshot = loaded {
-                // Данные пусты, но настройки пользователя (имя, тема, акцент)
-                // не выбрасываем — восстанавливаем только содержимое.
-                var settings = snapshot.settings
-                settings.hasSeededDemo = true
-                demo.settings = settings
-            }
-            apply(demo)
-            Persistence.save(demo)
+            return
         }
+
+        // Данные пусты, но пользователь уже один раз «спасал» демо —
+        // значит очистка была осознанной, не навязываем её снова.
+        if let snapshot = loaded, UserDefaults.standard.bool(forKey: rescueKey) {
+            apply(snapshot)
+            return
+        }
+
+        var demo = SampleData.make()
+        if let snapshot = loaded {
+            // Настройки пользователя (имя, тема, акцент) сохраняем,
+            // восстанавливаем только содержимое.
+            var settings = snapshot.settings
+            settings.hasSeededDemo = true
+            demo.settings = settings
+        }
+        apply(demo)
+        Persistence.save(demo)
+        UserDefaults.standard.set(true, forKey: rescueKey)
     }
 
     private func apply(_ snapshot: AppSnapshot) {

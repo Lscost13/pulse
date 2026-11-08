@@ -10,15 +10,17 @@ import SwiftUI
 
 // MARK: - Фон экрана
 
-/// Фон не должен влиять на раскладку: свечения рисуются в overlay, а не
-/// как дети ZStack, иначе их фиксированный размер (460 pt) растягивает
-/// контент шире экрана и обрезает его по краям.
+/// Фон не должен ни влиять на раскладку, ни съедать safe area.
+/// `Color.clear` принимает предложенный размер (safe-area рамку), а сама
+/// заливка и свечения живут в background/overlay — поэтому контент
+/// на экране остаётся внутри безопасных зон.
 struct PulseBackground: View {
     var accent: Color = PulsePalette.violetFallback
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        PulsePalette.background
+        Color.clear
+            .background(PulsePalette.background.ignoresSafeArea())
             .overlay {
                 ZStack {
                     Circle()
@@ -32,11 +34,28 @@ struct PulseBackground: View {
                         .blur(radius: 150)
                         .offset(x: 170, y: 280)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .ignoresSafeArea()
-            .clipped()
             .allowsHitTesting(false)
+    }
+}
+
+// MARK: - Жидкое стекло (iOS 26) с запасным материалом
+
+extension View {
+    @ViewBuilder
+    func pulseGlass<S: Shape>(in shape: S, tint: Color? = nil) -> some View {
+        if #available(iOS 26.0, *) {
+            if let tint = tint {
+                self.glassEffect(.regular.tint(tint), in: shape)
+            } else {
+                self.glassEffect(.regular, in: shape)
+            }
+        } else {
+            self
+                .background(.ultraThinMaterial, in: shape)
+                .background(PulsePalette.surface.opacity(0.55), in: shape)
+        }
     }
 }
 

@@ -123,6 +123,7 @@ struct PulseCheckbox: View {
                     Image(systemName: "checkmark")
                         .font(.system(size: size * 0.44, weight: .bold))
                         .foregroundStyle(Color.white)
+                        .symbolEffect(.bounce, value: isOn)
                         .transition(.scale.combined(with: .opacity))
                 }
             }

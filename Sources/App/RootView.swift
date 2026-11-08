@@ -214,21 +214,13 @@ struct PulseTabBar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
-        .background {
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 26, style: .continuous)
-                        .fill(PulsePalette.surface.opacity(0.55))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 26, style: .continuous)
-                        .strokeBorder(PulsePalette.stroke.opacity(0.8), lineWidth: 1)
-                }
-                .pulseShadow(PulseShadow.floating(scheme))
+        .overlay {
+            Capsule().strokeBorder(PulsePalette.stroke.opacity(0.7), lineWidth: 1)
         }
+        .pulseGlass(in: Capsule(), tint: accent.opacity(scheme == .dark ? 0.14 : 0.08))
+        .pulseShadow(PulseShadow.floating(scheme))
         .padding(.horizontal, 16)
-        .padding(.bottom, 6)
+        .padding(.bottom, 4)
         .padding(.top, 6)
     }
 }
