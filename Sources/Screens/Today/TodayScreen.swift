@@ -13,6 +13,8 @@ struct TodayScreen: View {
     @Environment(Router.self) private var router
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
+    private var accent: Color { store.settings.accent.color }
+
     var body: some View {
         ZStack {
             PulseBackground(accent: store.settings.accent.color)
