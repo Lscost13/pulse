@@ -312,7 +312,8 @@ struct InsightsScreen: View {
 
     private func barHeight(_ value: Int, max maxValue: Int) -> CGFloat {
         let ratio = Double(value) / Double(maxValue)
-        return max(value > 0 ? 3 : 0, 78 * ratio)
+        let height = max(value > 0 ? 3.0 : 0.0, 78.0 * ratio)
+        return CGFloat(height)
     }
 
     // MARK: - Продуктивные дни
@@ -340,7 +341,7 @@ struct InsightsScreen: View {
                                 .foregroundStyle(index == best ? accent : PulsePalette.inkTertiary)
                             Capsule()
                                 .fill(index == best ? AnyShapeStyle(PulseGradient.accent(accent)) : AnyShapeStyle(PulsePalette.cardSunken))
-                                .frame(height: max(6, 60 * Double(sums[index]) / Double(maxValue)))
+                                .frame(height: max(6, CGFloat(60.0 * Double(sums[index]) / Double(maxValue))))
                             Text(RuCal.weekdaysShort[index])
                                 .font(.system(size: 8.5, weight: .medium))
                                 .foregroundStyle(PulsePalette.inkTertiary)

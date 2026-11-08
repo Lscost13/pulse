@@ -226,7 +226,7 @@ struct PulsePrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(Color.white)
             .padding(.horizontal, 22)
             .padding(.vertical, 15)
-            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .frame(maxWidth: fullWidth ? CGFloat.infinity : nil)
             .background(PulseGradient.accent(accent), in: Capsule())
             .shadow(color: accent.opacity(configuration.isPressed ? 0.15 : 0.3), radius: 16, y: 8)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -243,7 +243,7 @@ struct PulseSecondaryButtonStyle: ButtonStyle {
             .foregroundStyle(PulsePalette.ink)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
-            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .frame(maxWidth: fullWidth ? CGFloat.infinity : nil)
             .background(PulsePalette.cardSunken, in: Capsule())
             .overlay(Capsule().strokeBorder(PulsePalette.stroke, lineWidth: 1))
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -377,7 +377,7 @@ struct PulseProgressBar: View {
                     .fill(PulsePalette.cardSunken)
                 Capsule()
                     .fill(PulseGradient.accent(tint))
-                    .frame(width: max(0, proxy.size.width * min(1, max(0, progress))))
+                    .frame(width: max(0, proxy.size.width * CGFloat(min(1, max(0, progress)))))
                     .animation(PulseMotion.progress, value: progress)
             }
         }
