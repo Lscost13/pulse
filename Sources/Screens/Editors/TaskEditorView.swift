@@ -400,7 +400,7 @@ struct TaskEditorView: View {
     private var subtasksBlock: some View {
         EditorCard(title: "Подзадачи", symbol: "list.bullet") {
             VStack(spacing: 8) {
-                ForEach(Array(subtasks.enumerated()), id: \.element.id) { index, subtask in
+                ForEach(subtasks) { subtask in
                     HStack(spacing: 9) {
                         Button {
                             Haptics.selection()
@@ -423,7 +423,7 @@ struct TaskEditorView: View {
 
                         Button {
                             withAnimation(PulseMotion.snappy) {
-                                subtasks.remove(at: index)
+                                subtasks.removeAll { $0.id == subtask.id }
                             }
                         } label: {
                             Image(systemName: "minus.circle")

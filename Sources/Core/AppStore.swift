@@ -384,8 +384,8 @@ final class AppStore {
     func toggleHabit(_ habit: Habit, on day: Date) {
         guard let index = habits.firstIndex(where: { $0.id == habit.id }) else { return }
         let key = day.dayKey
-        if let position = habits[index].completions.firstIndex(of: key) {
-            habits[index].completions.remove(at: position)
+        if habits[index].completions.contains(key) {
+            habits[index].completions.removeAll { $0 == key }
             Haptics.soft()
         } else {
             habits[index].completions.append(key)

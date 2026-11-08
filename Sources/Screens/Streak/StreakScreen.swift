@@ -330,8 +330,8 @@ struct StreakScreen: View {
                                 Haptics.selection()
                                 withAnimation(PulseMotion.snappy) {
                                     store.updateSettings { settings in
-                                        if let position = settings.restWeekdays.firstIndex(of: weekdayNumber) {
-                                            settings.restWeekdays.remove(at: position)
+                                        if settings.restWeekdays.contains(weekdayNumber) {
+                                            settings.restWeekdays.removeAll { $0 == weekdayNumber }
                                         } else {
                                             settings.restWeekdays.append(weekdayNumber)
                                         }
