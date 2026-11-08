@@ -1,4 +1,4 @@
-//
+﻿//
 //  DayReviewView.swift
 //  PULSE
 //
@@ -15,6 +15,7 @@ struct DayReviewView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var score: Int = 70
+    @State private var word: String = ""
     @State private var text: String = ""
     @State private var didLoad: Bool = false
     @State private var justSaved: Bool = false
@@ -40,6 +41,7 @@ struct DayReviewView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         dialCard
                         quickScores
+                        wordCard
                         thoughtCard
                         saveButton
                         historyCard
@@ -83,11 +85,12 @@ struct DayReviewView: View {
         if existing.score > 0 {
             score = existing.score
         }
+        word = existing.word
         text = existing.text
     }
 
     private func save() {
-        store.saveReflection(day: day, score: score, text: text)
+        store.saveReflection(day: day, score: score, word: word, text: text)
         Haptics.success()
         withAnimation(PulseMotion.smooth) {
             justSaved = true
@@ -166,14 +169,96 @@ struct DayReviewView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Мысль дня
+    // MARK: - Слово дня
+
+    private var wordSuggestions: [String] {
+        ["фокус", "ритм", "тишина", "движение", "порядок", "спокойствие"]
+    }
+
+    private var wordCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "character.cursor.ibeam")
+                    .font(.system(size: 10, weight: .bold))
+                Text("СЛОВО ДНЯ")
+                    .font(PulseFont.micro)
+                    .tracking(0.9)
+                Spacer()
+                Text("\(word.count)/24")
+                    .font(PulseFont.micro)
+                    .foregroundStyle(PulsePalette.inkTertiary.opacity(0.6))
+            }
+            .foregroundStyle(PulsePalette.inkTertiary)
+
+            HStack(spacing: 10) {
+                TextField("Одно слово про этот день", text: $word)
+                    .font(PulseFont.rounded(22, .semibold))
+                    .foregroundStyle(PulsePalette.ink)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .onChange(of: word) { _, newValue in
+                        if newValue.count > 24 {
+                            word = String(newValue.prefix(24))
+                        }
+                    }
+
+                if !word.isEmpty {
+                    Button {
+                        Haptics.soft()
+                        withAnimation(PulseMotion.snappy) { word = "" }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(PulsePalette.inkTertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(PulsePalette.card)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(PulsePalette.stroke, lineWidth: 1)
+            )
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 7) {
+                    ForEach(wordSuggestions, id: \.self) { suggestion in
+                        Button {
+                            Haptics.selection()
+                            withAnimation(PulseMotion.snappy) { word = suggestion }
+                        } label: {
+                            Text(suggestion)
+                                .font(PulseFont.caption)
+                                .foregroundStyle(word == suggestion ? Color.white : PulsePalette.inkSecondary)
+                                .padding(.horizontal, 11)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule().fill(word == suggestion
+                                                   ? AnyShapeStyle(accent)
+                                                   : AnyShapeStyle(PulsePalette.cardSunken))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    // MARK: - Мысли дня
 
     private var thoughtCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: "text.quote")
                     .font(.system(size: 10, weight: .bold))
-                Text("МЫСЛЬ ДНЯ")
+                Text("МЫСЛИ ДНЯ")
                     .font(PulseFont.micro)
                     .tracking(0.9)
                 Spacer()
@@ -317,9 +402,16 @@ struct DayReviewView: View {
                                         in: Capsule()
                                     )
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(reflection.day.dayMonthTitle)
-                                        .font(PulseFont.caption)
-                                        .foregroundStyle(PulsePalette.inkSecondary)
+                                    HStack(spacing: 5) {
+                                        Text(reflection.day.dayMonthTitle)
+                                            .font(PulseFont.caption)
+                                            .foregroundStyle(PulsePalette.inkSecondary)
+                                        if !reflection.word.isEmpty {
+                                            Text("· \(reflection.word)")
+                                                .font(PulseFont.caption)
+                                                .foregroundStyle(accent)
+                                        }
+                                    }
                                     if !reflection.text.isEmpty {
                                         Text(reflection.text)
                                             .font(PulseFont.micro)

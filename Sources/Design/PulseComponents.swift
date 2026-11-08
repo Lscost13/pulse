@@ -33,6 +33,13 @@ struct PulseBackground: View {
                         .frame(width: 380, height: 380)
                         .blur(radius: 150)
                         .offset(x: 170, y: 280)
+                    // Свет под нижним баром: жидкому стеклу нужно что преломлять,
+                    // иначе на почти чёрном фоне оно выглядит матовой плашкой.
+                    Ellipse()
+                        .fill(accent.opacity(scheme == .dark ? 0.30 : 0.18))
+                        .frame(width: 320, height: 220)
+                        .blur(radius: 90)
+                        .offset(x: 0, y: 330)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

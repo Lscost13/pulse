@@ -1,4 +1,4 @@
-//
+﻿//
 //  AppStore.swift
 //  PULSE
 //
@@ -698,27 +698,35 @@ final class AppStore {
     }
 
     @discardableResult
-    func saveReflection(day: Date, score: Int, text: String) -> DailyReflection {
+    func saveReflection(day: Date, score: Int, word: String, text: String) -> DailyReflection {
         let key = day.dayKey
         let clamped = min(100, max(0, score))
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedWord = word.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if let index = reflections.firstIndex(where: { $0.dayKey == key }) {
             reflections[index].score = clamped
-            reflections[index].text = trimmed
+            reflections[index].word = trimmedWord
+            reflections[index].text = trimmedText
             reflections[index].updatedAt = Date()
         } else {
             reflections.append(
-                DailyReflection(dayKey: key, score: clamped, text: trimmed, updatedAt: Date())
+                DailyReflection(
+                    dayKey: key,
+                    score: clamped,
+                    word: trimmedWord,
+                    text: trimmedText,
+                    updatedAt: Date()
+                )
             )
         }
         persist()
-        return reflection(for: day) ?? DailyReflection(dayKey: key, score: clamped, text: trimmed)
+        return reflection(for: day) ?? DailyReflection(dayKey: key, score: clamped, word: trimmedWord, text: trimmedText)
     }
 
     var filledReflections: [DailyReflection] {
         reflections
-            .filter { $0.score > 0 || !$0.text.isEmpty }
+            .filter { $0.isFilled }
             .sorted { $0.dayKey > $1.dayKey }
     }
 

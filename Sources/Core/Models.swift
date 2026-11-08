@@ -1,4 +1,4 @@
-//
+﻿//
 //  Models.swift
 //  PULSE
 //
@@ -399,15 +399,56 @@ struct DailyReflection: Identifiable, Codable, Hashable {
     var id: UUID = UUID()
     var dayKey: String = ""
     var score: Int = 0
+    var word: String = ""
     var text: String = ""
     var updatedAt: Date = Date()
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case dayKey
+        case score
+        case word
+        case text
+        case updatedAt
+    }
+
+    init() {}
+
+    init(
+        id: UUID = UUID(),
+        dayKey: String = "",
+        score: Int = 0,
+        word: String = "",
+        text: String = "",
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.dayKey = dayKey
+        self.score = score
+        self.word = word
+        self.text = text
+        self.updatedAt = updatedAt
+    }
+
+    /// Новое поле не должно ломать уже сохранённые впечатления.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
+        dayKey = (try? container.decode(String.self, forKey: .dayKey)) ?? ""
+        score = (try? container.decode(Int.self, forKey: .score)) ?? 0
+        word = (try? container.decode(String.self, forKey: .word)) ?? ""
+        text = (try? container.decode(String.self, forKey: .text)) ?? ""
+        updatedAt = (try? container.decode(Date.self, forKey: .updatedAt)) ?? Date()
+    }
 
     var day: Date {
         Date.from(dayKey: dayKey) ?? Date()
     }
 
     var isFilled: Bool {
-        score > 0 || !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        score > 0
+            || !word.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var scoreColorKey: String {

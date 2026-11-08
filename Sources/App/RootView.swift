@@ -184,6 +184,21 @@ struct PulseTabBar: View {
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
+        Group {
+            if #available(iOS 26.0, *) {
+                GlassEffectContainer(spacing: 18) {
+                    chrome
+                }
+            } else {
+                chrome
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 4)
+        .padding(.top, 6)
+    }
+
+    private var chrome: some View {
         HStack(spacing: 2) {
             ForEach(PulseTab.phoneTabs) { tab in
                 let isSelected = selection == tab
@@ -217,14 +232,14 @@ struct PulseTabBar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
-        .pulseGlass(in: Capsule(), tint: accent.opacity(scheme == .dark ? 0.16 : 0.10))
+        .pulseGlass(in: Capsule(), tint: accent.opacity(scheme == .dark ? 0.22 : 0.12))
         .overlay {
             Capsule().strokeBorder(
                 LinearGradient(
                     colors: [
-                        Color.white.opacity(scheme == .dark ? 0.34 : 0.55),
-                        Color.white.opacity(0.04),
-                        Color.white.opacity(scheme == .dark ? 0.16 : 0.3)
+                        Color.white.opacity(scheme == .dark ? 0.45 : 0.6),
+                        Color.white.opacity(0.05),
+                        Color.white.opacity(scheme == .dark ? 0.22 : 0.34)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -232,10 +247,21 @@ struct PulseTabBar: View {
                 lineWidth: 1
             )
         }
+        .overlay(alignment: .top) {
+            // блик сверху — «мокрое» стекло читается даже на тёмном фоне
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(scheme == .dark ? 0.14 : 0.35), Color.clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+                .frame(height: 22)
+                .padding(.horizontal, 10)
+                .allowsHitTesting(false)
+        }
         .pulseShadow(PulseShadow.floating(scheme))
-        .padding(.horizontal, 16)
-        .padding(.bottom, 4)
-        .padding(.top, 6)
     }
 }
 

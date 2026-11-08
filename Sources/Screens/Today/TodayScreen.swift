@@ -253,9 +253,14 @@ struct TodayScreen: View {
                     )
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(reflection == nil ? "Как прошёл день?" : "Итоги дня")
-                            .font(PulseFont.subheadline)
-                            .foregroundStyle(PulsePalette.ink)
+                        HStack(spacing: 6) {
+                            Text(reflection == nil ? "Как прошёл день?" : "Итоги дня")
+                                .font(PulseFont.subheadline)
+                                .foregroundStyle(PulsePalette.ink)
+                            if let word = reflection?.word, !word.isEmpty {
+                                TagPill(text: word, tint: scoreColor)
+                            }
+                        }
                         Text(hasText ? (reflection?.text ?? "") : (reflection == nil
                              ? "Оценка 0–100 и мысль дня"
                              : "Добавь мысль дня"))
