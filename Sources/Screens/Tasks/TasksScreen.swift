@@ -1,4 +1,4 @@
-//
+﻿//
 //  TasksScreen.swift
 //  PULSE
 //
@@ -6,6 +6,7 @@
 //  распределение по свободному времени.
 //
 
+import Foundation
 import SwiftUI
 
 struct TasksScreen: View {
@@ -97,7 +98,7 @@ struct TasksScreen: View {
                 }
 
                 CircleIconButton(symbol: "plus", size: 38, tint: Color.white, background: store.settings.accent.color) {
-                    router.openNewTask(day: store.selectedDay)
+                    router.openNewTask(day: router.selectedDay)
                 }
             }
         }

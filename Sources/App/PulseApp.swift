@@ -23,5 +23,6 @@ struct PulseApp: App {
         guard store.settings.remindersEnabled else { return }
         NotificationManager.requestAuthorizationIfNeeded()
         NotificationManager.reschedule(tasks: store.tasks)
+        NotificationManager.scheduleWeeklyReview(enabled: true)
     }
 }

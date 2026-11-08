@@ -1,4 +1,4 @@
-//
+﻿//
 //  FocusScreen.swift
 //  PULSE
 //
@@ -6,6 +6,7 @@
 //  Во время работы интерфейс «затихает» и оставляет только таймер.
 //
 
+import Foundation
 import SwiftUI
 import Combine
 
@@ -506,7 +507,7 @@ struct FocusScreen: View {
                     id: UUID(),
                     taskID: boundTaskID,
                     startedAt: Date().addingTimeInterval(-Double(spentMinutes) * 60),
-                    minutes: plannedMinutes,
+                    minutes: spentMinutes,
                     phase: .focus,
                     completed: true
                 )

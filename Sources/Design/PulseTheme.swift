@@ -1,4 +1,4 @@
-//
+﻿//
 //  PulseTheme.swift
 //  PULSE
 //
@@ -6,6 +6,7 @@
 //  Всё в одном месте — чтобы ни один экран не «изобретал» свои цвета.
 //
 
+import UIKit
 import SwiftUI
 
 // MARK: - HEX

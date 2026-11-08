@@ -6,6 +6,8 @@
 **Платформа:** iPhone (iOS 17+) и iPadOS. Написано на SwiftUI, без сторонних
 зависимостей, полностью офлайн. Сборка — на GitHub Actions, потому что Mac нет.
 
+Дизайн-система, информационная архитектура и логика описаны в [DESIGN.md](DESIGN.md).
+
 ---
 
 ## Что внутри
@@ -51,6 +53,29 @@ Tools/check_sources.py       # механические проверки исх�
 
 Сборка без сертификатов (`CODE_SIGNING_ALLOWED=NO`), поэтому .ipa **неподписанный** —
 подпись делается при установке с компьютера.
+
+### Как запушить (Windows, без GitHub CLI)
+
+1. Создай на GitHub **пустой** репозиторий (без README и .gitignore).
+2. В папке проекта:
+
+```powershell
+.\Tools\push.ps1 https://github.com/ЛОГИН/pulse.git
+```
+
+Вручную то же самое:
+
+```powershell
+git init -b main
+git add -A
+git commit -m "PULSE"
+git remote add origin https://github.com/ЛОГИН/pulse.git
+git push -u origin main
+```
+
+При первом push Git попросит логин и **personal access token** вместо пароля
+(Settings → Developer settings → Tokens (classic) → scope `repo` **и `workflow`** —
+без `workflow` GitHub откажется принимать файл `.github/workflows/build.yml`).
 
 ## Установка на iPhone 15
 

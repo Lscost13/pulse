@@ -270,6 +270,9 @@ final class AppStore {
             copy.reminderDate = next.addingTimeInterval(reminder.timeIntervalSince(due))
         }
         tasks.append(copy)
+        if settings.remindersEnabled {
+            NotificationManager.schedule(task: copy)
+        }
     }
 
     func move(_ task: TaskItem, to day: Date?) {

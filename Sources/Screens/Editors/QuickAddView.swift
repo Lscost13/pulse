@@ -1,10 +1,11 @@
-//
+﻿//
 //  QuickAddView.swift
 //  PULSE
 //
 //  Быстрое добавление: одно поле, пара решений — и задача в плане.
 //
 
+import Foundation
 import SwiftUI
 
 struct QuickAddView: View {

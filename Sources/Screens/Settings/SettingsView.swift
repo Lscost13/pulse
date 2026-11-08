@@ -1,8 +1,9 @@
-//
+﻿//
 //  SettingsView.swift
 //  PULSE
 //
 
+import Foundation
 import SwiftUI
 
 struct SettingsView: View {
@@ -12,6 +13,8 @@ struct SettingsView: View {
 
     @State private var showEraseConfirm: Bool = false
     @State private var showDemoConfirm: Bool = false
+    @State private var showNewCategory: Bool = false
+    @State private var newCategoryName: String = ""
     @State private var toast: String?
 
     private var accent: Color { store.settings.accent.color }
@@ -27,23 +30,27 @@ struct SettingsView: View {
                     header
 
                     section("Профиль") {
-                        profileCard(bindable: $store)
+                        profileCard(settings: $store.settings)
                     }
 
                     section("Оформление") {
-                        appearanceCard(store: $store)
+                        appearanceCard(settings: $store.settings)
                     }
 
                     section("Цели") {
-                        goalsCard(store: $store)
+                        goalsCard(settings: $store.settings)
                     }
 
                     section("Фокус") {
-                        focusCard(store: $store)
+                        focusCard(settings: $store.settings)
                     }
 
                     section("Поведение") {
-                        behaviorCard(store: $store)
+                        behaviorCard(settings: $store.settings)
+                    }
+
+                    section("Категории") {
+                        categoriesCard
                     }
 
                     section("Данные") {
@@ -83,6 +90,17 @@ struct SettingsView: View {
             Button("Отмена", role: .cancel) {}
         } message: {
             Text("Текущие данные будут заменены примером наполненного дня.")
+        }
+        .alert("Новая категория", isPresented: $showNewCategory) {
+            TextField("Название", text: $newCategoryName)
+            Button("Добавить") {
+                addCategory()
+            }
+            Button("Отмена", role: .cancel) {
+                newCategoryName = ""
+            }
+        } message: {
+            Text("Категория появится в фильтрах и в редакторе задач.")
         }
     }
 
@@ -128,7 +146,7 @@ struct SettingsView: View {
 
     // MARK: - Профиль
 
-    private func profileCard(bindable: Bindable<AppStore>) -> some View {
+    private func profileCard(settings: Binding<PulseSettings>) -> some View {
         PulseCard(padding: 16) {
             HStack(spacing: 14) {
                 ZStack {
@@ -144,7 +162,7 @@ struct SettingsView: View {
                     Text("Как тебя зовут")
                         .font(PulseFont.micro)
                         .foregroundStyle(PulsePalette.inkTertiary)
-                    TextField("Имя", text: bindable.settings.userName)
+                    TextField("Имя", text: settings.userName)
                         .font(PulseFont.subheadline)
                         .foregroundStyle(PulsePalette.ink)
                         .textInputAutocapitalization(.words)
@@ -160,16 +178,16 @@ struct SettingsView: View {
 
     // MARK: - Оформление
 
-    private func appearanceCard(store bindable: Bindable<AppStore>) -> some View {
+    private func appearanceCard(settings: Binding<PulseSettings>) -> some View {
         PulseCard(padding: 16) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 8) {
                     ForEach(AppearanceMode.allCases) { mode in
-                        let isSelected = store.settings.appearance == mode
+                        let isSelected = settings.appearance.wrappedValue == mode
                         Button {
                             Haptics.selection()
                             withAnimation(PulseMotion.theme) {
-                                bindable.settings.appearance.wrappedValue = mode
+                                settings.appearance.wrappedValue = mode
                             }
                         } label: {
                             VStack(spacing: 6) {
@@ -201,11 +219,11 @@ struct SettingsView: View {
                     Spacer()
                     HStack(spacing: 10) {
                         ForEach(AccentTheme.allCases) { theme in
-                            let isSelected = store.settings.accent == theme
+                            let isSelected = settings.accent.wrappedValue == theme
                             Button {
                                 Haptics.selection()
                                 withAnimation(PulseMotion.smooth) {
-                                    bindable.settings.accent.wrappedValue = theme
+                                    settings.accent.wrappedValue = theme
                                 }
                             } label: {
                                 Circle()
@@ -230,7 +248,7 @@ struct SettingsView: View {
 
     // MARK: - Цели
 
-    private func goalsCard(store bindable: Bindable<AppStore>) -> some View {
+    private func goalsCard(settings: Binding<PulseSettings>) -> some View {
         PulseCard(padding: 16) {
             VStack(spacing: 14) {
                 HStack {
@@ -238,19 +256,19 @@ struct SettingsView: View {
                         Text("Фокус в день")
                             .font(PulseFont.subheadline)
                             .foregroundStyle(PulsePalette.ink)
-                        Text("\(PulseDate.durationText(minutes: store.settings.dailyGoalMinutes))")
+                        Text("\(PulseDate.durationText(minutes: settings.dailyGoalMinutes.wrappedValue))")
                             .font(PulseFont.caption)
                             .foregroundStyle(PulsePalette.inkTertiary)
                     }
                     Spacer()
-                    Stepper("", value: bindable.settings.dailyGoalMinutes, in: 60...480, step: 30)
+                    Stepper("", value: settings.dailyGoalMinutes, in: 60...480, step: 30)
                         .labelsHidden()
                 }
 
                 Slider(
                     value: Binding(
-                        get: { Double(store.settings.dailyGoalMinutes) },
-                        set: { bindable.settings.dailyGoalMinutes.wrappedValue = Int($0) }
+                        get: { Double(settings.dailyGoalMinutes.wrappedValue) },
+                        set: { settings.dailyGoalMinutes.wrappedValue = Int($0) }
                     ),
                     in: 60...480,
                     step: 30
@@ -269,10 +287,10 @@ struct SettingsView: View {
                             .foregroundStyle(PulsePalette.inkTertiary)
                     }
                     Spacer()
-                    Text("\(store.settings.weeklyGoalTasks)")
+                    Text("\(settings.weeklyGoalTasks.wrappedValue)")
                         .font(PulseFont.number(16, .bold))
                         .foregroundStyle(PulsePalette.ink)
-                    Stepper("", value: bindable.settings.weeklyGoalTasks, in: 5...120, step: 5)
+                    Stepper("", value: settings.weeklyGoalTasks, in: 5...120, step: 5)
                         .labelsHidden()
                 }
             }
@@ -281,37 +299,37 @@ struct SettingsView: View {
 
     // MARK: - Фокус
 
-    private func focusCard(store bindable: Bindable<AppStore>) -> some View {
+    private func focusCard(settings: Binding<PulseSettings>) -> some View {
         PulseCard(padding: 16) {
             VStack(spacing: 12) {
                 stepperRow(
                     title: "Длительность фокуса",
-                    value: store.settings.focusLength,
-                    binding: bindable.settings.focusLength,
+                    value: settings.focusLength.wrappedValue,
+                    binding: settings.focusLength,
                     range: 10...90,
                     step: 5
                 )
                 PulseDivider()
                 stepperRow(
                     title: "Короткий перерыв",
-                    value: store.settings.shortBreak,
-                    binding: bindable.settings.shortBreak,
+                    value: settings.shortBreak.wrappedValue,
+                    binding: settings.shortBreak,
                     range: 3...20,
                     step: 1
                 )
                 PulseDivider()
                 stepperRow(
                     title: "Длинный перерыв",
-                    value: store.settings.longBreak,
-                    binding: bindable.settings.longBreak,
+                    value: settings.longBreak.wrappedValue,
+                    binding: settings.longBreak,
                     range: 10...45,
                     step: 5
                 )
                 PulseDivider()
                 stepperRow(
                     title: "Сессий до отдыха",
-                    value: store.settings.sessionsBeforeLongBreak,
-                    binding: bindable.settings.sessionsBeforeLongBreak,
+                    value: settings.sessionsBeforeLongBreak.wrappedValue,
+                    binding: settings.sessionsBeforeLongBreak,
                     range: 2...8,
                     step: 1
                 )
@@ -341,10 +359,10 @@ struct SettingsView: View {
 
     // MARK: - Поведение
 
-    private func behaviorCard(store bindable: Bindable<AppStore>) -> some View {
+    private func behaviorCard(settings: Binding<PulseSettings>) -> some View {
         PulseCard(padding: 16) {
             VStack(spacing: 14) {
-                Toggle(isOn: bindable.settings.weekStartsMonday) {
+                Toggle(isOn: settings.weekStartsMonday) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Неделя с понедельника")
                             .font(PulseFont.subheadline)
@@ -358,7 +376,7 @@ struct SettingsView: View {
 
                 PulseDivider()
 
-                Toggle(isOn: bindable.settings.remindersEnabled) {
+                Toggle(isOn: settings.remindersEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Напоминания")
                             .font(PulseFont.subheadline)
@@ -379,6 +397,82 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Категории
+
+    private var categoriesCard: some View {
+        PulseCard(padding: 16) {
+            VStack(spacing: 0) {
+                ForEach(Array(store.categories.enumerated()), id: \.element.id) { index, category in
+                    if index > 0 {
+                        PulseDivider()
+                    }
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Color(hex: category.colorHex).opacity(0.16))
+                                .frame(width: 26, height: 26)
+                            Image(systemName: category.symbol)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color(hex: category.colorHex))
+                        }
+                        Text(category.name)
+                            .font(PulseFont.subheadline)
+                            .foregroundStyle(PulsePalette.ink)
+                        Spacer()
+                        Button {
+                            Haptics.soft()
+                            store.deleteCategory(category)
+                            showMessage("Категория удалена")
+                        } label: {
+                            Image(systemName: "minus.circle")
+                                .font(.system(size: 15))
+                                .foregroundStyle(PulsePalette.inkTertiary.opacity(0.7))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.vertical, 9)
+                }
+
+                PulseDivider()
+
+                Button {
+                    newCategoryName = ""
+                    showNewCategory = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Добавить категорию")
+                            .font(PulseFont.caption)
+                        Spacer()
+                    }
+                    .foregroundStyle(accent)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func addCategory() {
+        let trimmed = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let palette = ["#7C6EEB", "#5EEAD4", "#F59E0B", "#F472B6", "#3B82F6", "#34D399", "#FB7185"]
+        let hex = palette[store.categories.count % palette.count]
+        store.addCategory(
+            TaskCategory(
+                id: UUID(),
+                name: trimmed,
+                colorHex: hex,
+                symbol: "circle.fill",
+                order: store.categories.count
+            )
+        )
+        newCategoryName = ""
+        showMessage("Категория добавлена")
     }
 
     // MARK: - Данные

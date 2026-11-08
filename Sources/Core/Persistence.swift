@@ -32,10 +32,23 @@ enum Persistence {
     }
 
     static func load() -> AppSnapshot? {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: fileURL.path) else { return nil }
         guard let data = try? Data(contentsOf: fileURL) else { return nil }
+
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
-        return try? decoder.decode(AppSnapshot.self, from: data)
+
+        if let snapshot = try? decoder.decode(AppSnapshot.self, from: data) {
+            return snapshot
+        }
+
+        // Файл есть, но прочитать его не удалось (например, после смены схемы).
+        // Не затираем данные молча — отодвигаем файл в сторону.
+        let stamp = Int(Date().timeIntervalSince1970)
+        let backup = directory.appendingPathComponent("store-recovery-\(stamp).json")
+        try? fileManager.moveItem(at: fileURL, to: backup)
+        return nil
     }
 
     static func save(_ snapshot: AppSnapshot) {

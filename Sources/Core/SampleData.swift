@@ -15,7 +15,7 @@ enum SampleData {
     // MARK: - Стабильные идентификаторы
 
     private static func uid(_ value: Int) -> UUID {
-        UUID(uuidString: String(format: "00000000-0000-4000-8000-%012d", value)) ?? UUID()
+        UUID(uuidString: String(format: "00000000-0000-4000-8000-%012ld", value)) ?? UUID()
     }
 
     static func day(_ offset: Int) -> Date {
