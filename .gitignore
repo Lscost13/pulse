@@ -1,0 +1,22 @@
+# Xcode
+build/
+DerivedData/
+*.xcarchive
+*.ipa
+*.dSYM
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+PULSE.xcodeproj/
+
+# macOS
+.DS_Store
+
+# Node / tooling
+node_modules/
+__pycache__/
+
+# Local secrets
+*.p12
+*.mobileprovision
+.env
