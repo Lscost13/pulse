@@ -25,10 +25,19 @@ final class AppStore {
     // MARK: - Инициализация
 
     init() {
-        if let snapshot = Persistence.load() {
+        let loaded = Persistence.load()
+        if let snapshot = loaded,
+           snapshot.settings.hasSeededDemo || !snapshot.tasks.isEmpty || !snapshot.habits.isEmpty {
             apply(snapshot)
         } else {
-            let demo = SampleData.make()
+            var demo = SampleData.make()
+            if let snapshot = loaded {
+                // Данные пусты, но настройки пользователя (имя, тема, акцент)
+                // не выбрасываем — восстанавливаем только содержимое.
+                var settings = snapshot.settings
+                settings.hasSeededDemo = true
+                demo.settings = settings
+            }
             apply(demo)
             Persistence.save(demo)
         }

@@ -22,14 +22,16 @@ struct ProgressRing: View {
         ZStack {
             Circle()
                 .stroke(PulsePalette.cardSunken.opacity(trackOpacity), lineWidth: lineWidth)
-            Circle()
-                .trim(from: 0, to: max(0.0001, min(1, animated)))
-                .stroke(
-                    PulseGradient.accent(accent),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .shadow(color: accent.opacity(0.35), radius: 12)
+            if animated > 0.001 {
+                Circle()
+                    .trim(from: 0, to: min(1, animated))
+                    .stroke(
+                        PulseGradient.accent(accent),
+                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: accent.opacity(0.35), radius: 12)
+            }
         }
         .onAppear {
             withAnimation(PulseMotion.progress.delay(0.15)) {
@@ -279,5 +281,33 @@ struct AnimatedNumberText: View {
             .foregroundStyle(tint)
             .contentTransition(.numericText())
             .animation(PulseMotion.smooth, value: value)
+    }
+}
+
+// MARK: - Появление блока
+
+/// Мягкое появление секции: чуть вверх и из прозрачности.
+/// Небольшая задержка по индексу даёт «дорогой» каскад при открытии экрана.
+struct PulseAppearModifier: ViewModifier {
+    var index: Int
+    var enabled: Bool
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown || !enabled ? 1 : 0)
+            .offset(y: shown || !enabled ? 0 : 16)
+            .onAppear {
+                guard enabled, !shown else { return }
+                withAnimation(PulseMotion.smooth.delay(Double(min(index, 8)) * 0.045)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+extension View {
+    func pulseAppear(_ index: Int = 0, enabled: Bool = true) -> some View {
+        modifier(PulseAppearModifier(index: index, enabled: enabled))
     }
 }

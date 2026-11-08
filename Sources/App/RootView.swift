@@ -39,33 +39,37 @@ struct RootView: View {
         }
         .environment(router)
         .animation(PulseMotion.theme, value: store.settings.hasOnboarded)
-        .sheet(item: $router.taskEditor) { request in
-            TaskEditorView(request: request)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(item: $router.eventEditor) { request in
-            EventEditorView(request: request)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(item: $router.habitEditor) { request in
-            HabitEditorView(request: request)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $router.showQuickAdd) {
-            QuickAddView()
-                .presentationDetents([.height(360), .large])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(.thinMaterial)
-        }
-        .sheet(isPresented: $router.showSettings) {
-            SettingsView()
-        }
-        .sheet(isPresented: $router.showStreak) {
-            StreakScreen(isModal: true)
-                .presentationDragIndicator(.visible)
+        .sheet(item: $router.sheet) { route in
+            sheetContent(route)
+                .environment(store)
+                .environment(router)
         }
         .onChange(of: store.settings.appearance) { _, _ in
             flashThemeVeil()
+        }
+    }
+
+    @ViewBuilder
+    private func sheetContent(_ route: SheetRoute) -> some View {
+        switch route {
+        case .quickAdd:
+            QuickAddView()
+                .presentationDetents([.height(400), .large])
+                .presentationDragIndicator(.visible)
+        case .settings:
+            SettingsView()
+        case .streak:
+            StreakScreen(isModal: true)
+                .presentationDragIndicator(.visible)
+        case .task(let request):
+            TaskEditorView(request: request)
+                .presentationDragIndicator(.visible)
+        case .event(let request):
+            EventEditorView(request: request)
+                .presentationDragIndicator(.visible)
+        case .habit(let request):
+            HabitEditorView(request: request)
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -90,16 +94,18 @@ struct RootView: View {
                 case .streak: StreakScreen(isModal: false)
                 }
             }
+            .id(router.tab)
+            .transition(.opacity)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 PulseTabBar(selection: tabBinding(router: router), accent: store.settings.accent.color)
             }
-            .transition(.opacity)
 
             addButton
                 .padding(.trailing, 20)
-                .padding(.bottom, 96)
+                .padding(.bottom, 92)
         }
+        .animation(PulseMotion.smooth, value: router.tab)
     }
 
     private var addButton: some View {

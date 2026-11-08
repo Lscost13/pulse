@@ -32,37 +32,37 @@ struct TodayScreen: View {
 
     private var compactLayout: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.sectionSpacing) {
-            header
-            heroCard
-            agendaCard
-            tasksCard
-            freeTimeCard
-            streakCard
-            scheduleCard
+            header.pulseAppear(0)
+            heroCard.pulseAppear(1)
+            agendaCard.pulseAppear(2)
+            tasksCard.pulseAppear(3)
+            freeTimeCard.pulseAppear(4)
+            streakCard.pulseAppear(5)
+            scheduleCard.pulseAppear(6)
         }
         .padding(.horizontal, PulseMetrics.screenPadding)
         .padding(.top, 6)
-        .padding(.bottom, 120)
+        .padding(.bottom, 110)
     }
 
     private var wideLayout: some View {
         VStack(alignment: .leading, spacing: PulseMetrics.sectionSpacing) {
-            header
+            header.pulseAppear(0)
             HStack(alignment: .top, spacing: 20) {
                 VStack(spacing: PulseMetrics.sectionSpacing) {
-                    heroCard
-                    tasksCard
+                    heroCard.pulseAppear(1)
+                    tasksCard.pulseAppear(3)
                 }
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: PulseMetrics.sectionSpacing) {
-                    agendaCard
-                    freeTimeCard
-                    streakCard
+                    agendaCard.pulseAppear(2)
+                    freeTimeCard.pulseAppear(4)
+                    streakCard.pulseAppear(5)
                 }
                 .frame(maxWidth: .infinity)
             }
-            scheduleCard
+            scheduleCard.pulseAppear(6)
         }
         .padding(.horizontal, 24)
         .padding(.top, 10)

@@ -10,25 +10,33 @@ import SwiftUI
 
 // MARK: - Фон экрана
 
+/// Фон не должен влиять на раскладку: свечения рисуются в overlay, а не
+/// как дети ZStack, иначе их фиксированный размер (460 pt) растягивает
+/// контент шире экрана и обрезает его по краям.
 struct PulseBackground: View {
     var accent: Color = PulsePalette.violetFallback
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        ZStack {
-            PulsePalette.background
-            Circle()
-                .fill(accent.opacity(scheme == .dark ? 0.16 : 0.10))
-                .frame(width: 460, height: 460)
-                .blur(radius: 130)
-                .offset(x: -150, y: -320)
-            Circle()
-                .fill(PulsePalette.mint.opacity(scheme == .dark ? 0.10 : 0.07))
-                .frame(width: 380, height: 380)
-                .blur(radius: 150)
-                .offset(x: 170, y: 280)
-        }
-        .ignoresSafeArea()
+        PulsePalette.background
+            .overlay {
+                ZStack {
+                    Circle()
+                        .fill(accent.opacity(scheme == .dark ? 0.16 : 0.10))
+                        .frame(width: 460, height: 460)
+                        .blur(radius: 130)
+                        .offset(x: -150, y: -320)
+                    Circle()
+                        .fill(PulsePalette.mint.opacity(scheme == .dark ? 0.10 : 0.07))
+                        .frame(width: 380, height: 380)
+                        .blur(radius: 150)
+                        .offset(x: 170, y: 280)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            }
+            .ignoresSafeArea()
+            .clipped()
+            .allowsHitTesting(false)
     }
 }
 

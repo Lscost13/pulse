@@ -1,4 +1,4 @@
-name: PULSE
+﻿name: PULSE
 options:
   bundleIdPrefix: com.pulse
   deploymentTarget:
@@ -10,8 +10,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "2"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     SWIFT_STRICT_CONCURRENCY: minimal
@@ -44,6 +44,7 @@ targets:
         ENABLE_PREVIEWS: YES
         SWIFT_OPTIMIZATION_LEVEL: "-O"
         SWIFT_COMPILATION_MODE: wholemodule
+        STRIP_INSTALLED_PRODUCT: NO
 
 schemes:
   PULSE:

@@ -78,22 +78,112 @@ struct HabitEditorRequest: Identifiable, Hashable {
     var habit: Habit?
 }
 
+/// Один шит на всё приложение. Несколько `.sheet` на одном экране конфликтуют
+/// (SwiftUI показывает только один и может вести себя непредсказуемо),
+/// поэтому все сценарии идут через единый маршрут.
+enum SheetRoute: Identifiable, Hashable {
+    case quickAdd
+    case settings
+    case streak
+    case task(TaskEditorRequest)
+    case event(EventEditorRequest)
+    case habit(HabitEditorRequest)
+
+    var id: String {
+        switch self {
+        case .quickAdd: return "quickAdd"
+        case .settings: return "settings"
+        case .streak: return "streak"
+        case .task(let request): return "task-\(request.id.uuidString)"
+        case .event(let request): return "event-\(request.id.uuidString)"
+        case .habit(let request): return "habit-\(request.id.uuidString)"
+        }
+    }
+}
+
 @Observable
 final class Router {
     var tab: PulseTab = .today
     var calendarMode: CalendarMode = .month
     var selectedDay: Date = Date().startOfDay()
-    var taskEditor: TaskEditorRequest?
-    var eventEditor: EventEditorRequest?
-    var habitEditor: HabitEditorRequest?
-    var showQuickAdd: Bool = false
-    var showSettings: Bool = false
-    var showStreak: Bool = false
-    var showCommandBar: Bool = false
+    var sheet: SheetRoute?
     var smartList: SmartList = .today
     var searchText: String = ""
     var focusTaskID: UUID?
-    var padDetailVisible: Bool = true
+
+    // MARK: - Совместимые аксессоры
+
+    var taskEditor: TaskEditorRequest? {
+        get {
+            if case .task(let request)? = sheet { return request }
+            return nil
+        }
+        set {
+            sheet = newValue.map { SheetRoute.task($0) }
+        }
+    }
+
+    var eventEditor: EventEditorRequest? {
+        get {
+            if case .event(let request)? = sheet { return request }
+            return nil
+        }
+        set {
+            sheet = newValue.map { SheetRoute.event($0) }
+        }
+    }
+
+    var habitEditor: HabitEditorRequest? {
+        get {
+            if case .habit(let request)? = sheet { return request }
+            return nil
+        }
+        set {
+            sheet = newValue.map { SheetRoute.habit($0) }
+        }
+    }
+
+    var showQuickAdd: Bool {
+        get {
+            if case .quickAdd? = sheet { return true }
+            return false
+        }
+        set {
+            if newValue {
+                sheet = .quickAdd
+            } else if case .quickAdd? = sheet {
+                sheet = nil
+            }
+        }
+    }
+
+    var showSettings: Bool {
+        get {
+            if case .settings? = sheet { return true }
+            return false
+        }
+        set {
+            if newValue {
+                sheet = .settings
+            } else if case .settings? = sheet {
+                sheet = nil
+            }
+        }
+    }
+
+    var showStreak: Bool {
+        get {
+            if case .streak? = sheet { return true }
+            return false
+        }
+        set {
+            if newValue {
+                sheet = .streak
+            } else if case .streak? = sheet {
+                sheet = nil
+            }
+        }
+    }
 
     func openNewTask(day: Date? = nil, start: Date? = nil) {
         taskEditor = TaskEditorRequest(task: nil, day: day, suggestedStart: start)
