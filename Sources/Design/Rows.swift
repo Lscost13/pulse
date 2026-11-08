@@ -277,7 +277,7 @@ struct HabitRow: View {
                     Image(systemName: isDone ? "checkmark" : habit.symbol)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(isDone ? color : PulsePalette.inkSecondary)
-                        .contentTransition(.symbolEffect(.replace))
+                        .contentTransition(.opacity)
                 }
             }
             .buttonStyle(.plain)
