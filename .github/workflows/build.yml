@@ -90,6 +90,19 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: Summarize compiler errors
+        if: failure()
+        run: |
+          LOG="$RUNNER_TEMP/build.log"
+          if [ -f "$LOG" ]; then
+            echo "===================== ОШИБКИ КОМПИЛЯЦИИ ====================="
+            grep -nE "error:" "$LOG" | sed -E 's|/Users/runner/work/[^/]*/[^/]*/||g' | head -n 50 || echo "(строк с 'error:' не найдено)"
+            echo "=============================================================="
+            echo "Полный лог — в артефакте build-log."
+          else
+            echo "build.log отсутствует — сборка упала до xcodebuild (проверь шаги XcodeGen / xcode-select)."
+          fi
+
       - name: Upload build log on failure
         if: failure()
         uses: actions/upload-artifact@v4
