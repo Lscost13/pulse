@@ -118,11 +118,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP"
+          REPO="${{ github.repository }}"
+          IPA="$RUNNER_TEMP/PULSE-unsigned.ipa"
           NOTES="Автосборка PULSE · $(date -u +'%Y-%m-%d %H:%M UTC') · ${GITHUB_SHA:0:7}"
-          if gh release view latest >/dev/null 2>&1; then
-            gh release edit latest --notes "$NOTES"
+          if gh release view latest --repo "$REPO" >/dev/null 2>&1; then
+            gh release edit latest --repo "$REPO" --notes "$NOTES"
           else
-            gh release create latest --title "PULSE — latest build" --notes "$NOTES"
+            gh release create latest --repo "$REPO" --title "PULSE — latest build" --notes "$NOTES"
           fi
-          gh release upload latest PULSE-unsigned.ipa --clobber
+          gh release upload latest "$IPA" --repo "$REPO" --clobber
+          echo "download: https://github.com/$REPO/releases/download/latest/PULSE-unsigned.ipa"

@@ -1,4 +1,4 @@
-# PULSE
+﻿# PULSE
 
 Премиальное приложение для управления временем: задачи, календарь, фокус,
 привычки и серия дней — в одном спокойном интерфейсе.
@@ -49,7 +49,7 @@ Tools/check_sources.py       # механические проверки исх�
 2. Actions → workflow **Build PULSE** запустится сам на push.
 3. В логах: `xcodegen generate` → `xcodebuild archive` → `zip` в `Payload/` → артефакт `PULSE-unsigned-ipa`.
 4. Готовый файл также публикуется в релиз `latest`:
-   `https://github.com/<OWNER>/<REPO>/releases/download/latest/PULSE-unsigned.ipa`
+   `https://github.com/Lscost13/pulse/releases/download/latest/PULSE-unsigned.ipa`
 
 Сборка без сертификатов (`CODE_SIGNING_ALLOWED=NO`), поэтому .ipa **неподписанный** —
 подпись делается при установке с компьютера.
@@ -60,7 +60,7 @@ Tools/check_sources.py       # механические проверки исх�
 2. В папке проекта:
 
 ```powershell
-.\Tools\push.ps1 https://github.com/ЛОГИН/pulse.git
+.\Tools\push.ps1 https://github.com/Lscost13/pulse.git
 ```
 
 Вручную то же самое:
@@ -69,7 +69,7 @@ Tools/check_sources.py       # механические проверки исх�
 git init -b main
 git add -A
 git commit -m "PULSE"
-git remote add origin https://github.com/ЛОГИН/pulse.git
+git remote add origin https://github.com/Lscost13/pulse.git
 git push -u origin main
 ```
 
